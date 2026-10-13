@@ -1,0 +1,55 @@
+name: Modrinth-Seite
+
+# Überträgt Beschreibung (.github/modrinth-description.md), Logo und Screenshots
+# auf die Modrinth-Projektseite. Läuft bei Änderungen daran oder per Hand.
+# Bilder der Galerie werden nur hochgeladen, wenn sie dort noch fehlen.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/modrinth-description.md'
+      - 'docs/**'
+
+env:
+  MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+  PROJECT: FmCwRnux
+  API: https://api.modrinth.com/v2
+  UA: RedstoneNugget/inspectall (github.com/RedstoneNugget)
+
+jobs:
+  page:
+    runs-on: ubuntu-latest
+    if: ${{ github.repository_owner == 'RedstoneNugget' }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Token vorhanden?
+        run: test -n "$MODRINTH_TOKEN" || { echo "Secret MODRINTH_TOKEN fehlt"; exit 1; }
+      - name: Beschreibung
+        run: |
+          jq -Rs '{body: .}' .github/modrinth-description.md > body.json
+          curl -sf -X PATCH "$API/project/$PROJECT" -H "Authorization: $MODRINTH_TOKEN" -H "User-Agent: $UA" -H "Content-Type: application/json" --data @body.json
+      - name: Logo
+        run: |
+          curl -sf -X PATCH "$API/project/$PROJECT/icon?ext=png" -H "Authorization: $MODRINTH_TOKEN" -H "User-Agent: $UA" -H "Content-Type: image/png" --data-binary @docs/logo.png
+      - name: Galerie
+        run: |
+          have=$(curl -sf "$API/project/$PROJECT" -H "Authorization: $MODRINTH_TOKEN" -H "User-Agent: $UA" | jq -r '.gallery[].title')
+          order=0
+          while IFS='|' read -r file title desc; do
+            [ -z "$file" ] && continue
+            order=$((order + 1))
+            if grep -qxF "$title" <<< "$have"; then echo "schon da: $title"; continue; fi
+            featured=false; [ $order -eq 1 ] && featured=true
+            q=$(jq -rn --arg t "$title" --arg d "$desc" '"title=\($t|@uri)&description=\($d|@uri)"')
+            curl -sf -X POST "$API/project/$PROJECT/gallery?ext=png&featured=$featured&ordering=$order&$q" -H "Authorization: $MODRINTH_TOKEN" -H "User-Agent: $UA" -H "Content-Type: image/png" --data-binary @"docs/$file"
+            echo "hochgeladen: $title"
+          done <<'LIST'
+          panel.png|Block panel|All data of a bee nest, including the bees inside
+          marker.png|Coordinate marker|Marked positions are visible through walls
+          entity.png|Entity panel|Full entity NBT of a zombie
+          search.png|Search|Search through all lines of a chest
+          item.png|Item panel|All data components of an item
+          multiplayer.png|Multiplayer|Shows what the server sends, the rest is marked
+          settings.png|Settings|Colours, layout and categories
+          LIST

@@ -36,7 +36,7 @@ jobs:
         if: env.MODRINTH_TOKEN != ''
         uses: Kir-Antipov/mc-publish@v3.3
         with:
-          modrinth-id: MODRINTH_ID
+          modrinth-id: FmCwRnux
           modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
           files: build/libs/inspectall-*.jar
           name: InspectAll ${{ github.ref_name }}
