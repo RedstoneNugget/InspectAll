@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "inspectall",
+  "version": "${version}",
+  "name": "InspectAll",
+  "description": "Zeigt alle verfügbaren Daten zu Blöcken, Items und Entities: Blockstate, Komponenten, Block-Entity- und Entity-NBT (SNBT mit Hervorhebung), Koordinaten-Markierungen durch Wände, Kopieren und JSON-Export. Rein clientseitig.",
+  "authors": ["redstone_nugget"],
+  "contact": {
+    "homepage": "https://modrinth.com/mod/inspectall",
+    "sources": "https://github.com/RedstoneNugget/InspectAll",
+    "issues": "https://github.com/RedstoneNugget/InspectAll/issues"
+  },
+  "license": "MIT",
+  "icon": "assets/inspectall/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "client": ["de.inspectall.client.InspectAllClient"],
+    "modmenu": ["de.inspectall.client.config.ModMenuIntegration"]
+  },
+  "mixins": ["inspectall.mixins.json"],
+  "depends": {
+    "fabricloader": ">=0.19.0",
+    "minecraft": "~1.21.11",
+    "java": ">=21",
+    "fabric-api": "*"
+  },
+  "suggests": {
+    "modmenu": "*"
+  }
+}

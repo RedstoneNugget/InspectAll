@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "de.inspectall.client.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "HandledScreenAccessor",
+    "CreativeInventoryScreenAccessor"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "id": "inspectall-gametest",
+  "version": "1.0.0",
+  "name": "InspectAll GameTest",
+  "environment": "*",
+  "entrypoints": {
+    "fabric-client-gametest": ["de.inspectall.test.InspectAllClientGameTest"]
+  },
+  "depends": {
+    "inspectall": "*"
+  }
+}
