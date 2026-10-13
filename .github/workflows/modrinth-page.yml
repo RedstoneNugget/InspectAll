@@ -5,6 +5,9 @@ name: Modrinth-Seite
 # Bilder der Galerie werden nur hochgeladen, wenn sie dort noch fehlen.
 on:
   workflow_dispatch:
+  workflow_run:
+    workflows: [Release]
+    types: [completed]
   push:
     branches: [main]
     paths:
@@ -27,8 +30,13 @@ jobs:
         run: test -n "$MODRINTH_TOKEN" || { echo "Secret MODRINTH_TOKEN fehlt"; exit 1; }
       - name: Beschreibung
         run: |
-          jq -Rs '{body: .}' .github/modrinth-description.md > body.json
+          jq -Rs '{body: ., license_id: "MIT", source_url: "https://github.com/RedstoneNugget/InspectAll", issues_url: "https://github.com/RedstoneNugget/InspectAll/issues"}' .github/modrinth-description.md > body.json
           curl -sf -X PATCH "$API/project/$PROJECT" -H "Authorization: $MODRINTH_TOKEN" -H "User-Agent: $UA" -H "Content-Type: application/json" --data @body.json
+      - name: Kategorien
+        # Geht erst, wenn auf Modrinth mindestens eine Version existiert
+        continue-on-error: true
+        run: |
+          curl -sf -X PATCH "$API/project/$PROJECT" -H "Authorization: $MODRINTH_TOKEN" -H "User-Agent: $UA" -H "Content-Type: application/json" --data '{"categories": ["utility", "management"]}'
       - name: Logo
         run: |
           curl -sf -X PATCH "$API/project/$PROJECT/icon?ext=png" -H "Authorization: $MODRINTH_TOKEN" -H "User-Agent: $UA" -H "Content-Type: image/png" --data-binary @docs/logo.png
